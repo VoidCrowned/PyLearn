@@ -178,7 +178,11 @@ menu_04() {
 menu_05() {
     show_logo
     echo -e "${m5}\n"
-    ip -4 addr show | awk '/inet /{print "Interface", $NF, "has the address", $2}' | awk '{print " "$0}'
+    ip -4 addr show | awk '/inet /{
+        iface=$NF
+        addr=$2
+        printf " Interface %s%s%s has the address %s%s%s\n", "'${fbold}'", iface, "'${freset}'", "'${fbold}'", addr, "'${freset}'"
+    }'
     btm_seq
 }
 
