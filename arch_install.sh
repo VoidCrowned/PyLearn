@@ -1,28 +1,32 @@
 #!/usr/bin/env bash
 
 
-## First we're going to need a basic structure
-## Verify boot mode
-#    - cat /sys/firmware/efi/fw_platform_size
-#    - print && check return value
-#    - confirm result
+# List of scripts to run
+scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
 
-## Set kbd
-#    - list available kb layouts
-#    - offer them as options to pick, either as number or by name
-#    - with loadkeys
+# Loop through each script
+for script in "${scripts[@]}"; do
+    echo "Running $script."
+    # Execute each script
+    ./$script
+    if [[ $? -ne 0 ]]; then
+        echo "$script failed. Exiting."
+        exit 1
+    fi
+done
 
-## Set font
-#    - list available fonts
-#    - same as above, but with a grep filter added
-#    - with setfont
+echo "All scripts executed successfully!"
+exit 0
+#!/usr/bin/env bash
 
-## Set internet connection
-#    - ip link
-#    - check with `ping`
 
-## Set date & time
-#    - `timedatectl`
+## Checklist
+# [x] set kbd
+# [x] set font
+# [x] Check boot mode
+# [ ] Check internet connection
+# [ ] set date & time
+# timedatectl set-timezone Europe/Berlin
 
 ## Partition disks
 #    - call `cfdisk`, then return
