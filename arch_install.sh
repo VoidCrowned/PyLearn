@@ -17,7 +17,6 @@ done
 
 echo "All scripts executed successfully!"
 exit 0
-#!/usr/bin/env bash
 
 
 ## Checklist
