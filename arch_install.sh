@@ -8,7 +8,7 @@ scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
 for script in "${scripts[@]}"; do
     echo "Running $script."
     # Execute each script
-    ./$script
+    ./checks/$script
     if [[ $? -ne 0 ]]; then
         echo "$script failed. Exiting."
         exit 1
