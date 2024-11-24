@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 
+# Update reflector for better mirrors
+reflector -c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist
+echo "Updated mirrors."
+cat pacman_settings >> /etc/pacman.conf
+echo "Appended pacman_settings to pacman.conf."
+
 # List of scripts to run
 scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
 
