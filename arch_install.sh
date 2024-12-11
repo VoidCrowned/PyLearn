@@ -5,134 +5,125 @@
 freset='\033[0m'
 fbold='\033[1m'
 
-## Success?
-success() {
-    if [ $? -eq 0 ]; then
-        echo -e $suc
-        exit 0
+
+## Main vars
+failed_count=0
+
+
+## Main loop
+t_exec() {
+    local task="$1"
+    echo -e "Executing '$task' ..."
+    eval "$task"
+    local status=$?
+    if [ $status -eq 0 ]; then
+        echo -e "Successfully executed '$task'."
     else
-        echo -e $err
-        exit 1
+        echo -e "Failed to execute '$task'."
+        failed_count=$((failed_count + 1))
     fi
 }
 
-# Check privileges
+
+## Check privileges
 if [ "$EUID" -ne 0 ]; then
-    echo -e "\n Run this script with ${fbold}sudo${freset} or as ${fbold}root${freset}."
-    echo -e " Try again. Bailing.\n"
+    echo -e "Run this script with ${fbold}sudo${freset} or as ${fbold}root${freset}."
+    echo -e "Try again. Bailing."
     exit 1
 fi
 
-## Pacman mirrorlist update
-task="Pacman mirrorlist update"
-suc="Successfully executed '$task'."
-err="Failed to execute '$task'."
-echo -e "Updating pacman mirrolist..."
-reflector -c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist
-success
 
-## Pacman settigs
-suc="Updated pacman.conf..."
-err="Failed to update pacman.conf."
-echo -e "Updatiing pacman.conf."
-cat pacman_settings >> /etc/pacman.conf
-success
-
-
-## Pacman db update
-suc="Updated pacman db."
-err="Failed to update pacman."
-echo -e "Updating pacman..."
-pacman -Syu --noconfirm
-success
-
-
-## Pacstrap
+## Task vars
+locale_gen="/etc/locale.gen"
+locale_conf="/etc/locale.conf"
+mirror_opts="-c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist"
+pacman_settings="/etc/pacman.conf"
 pkglist=("base" "linux" "linux-firmware" "intel-ucode")
-suc="Done!"
-err="Oops!"
-echo -e "Pacstrapping $pkglist."
-pacstrap -K $pkglist
-success
+timezone="Europe/Berlin"
+vconsole_conf="/etc/vconsole.conf"
 
 
-## fstab
-suc="Generated fstab successfully."
-err="Failed to generate fstab."
-echo -e "Generating fstab..."
-#genfstab -U /mnt >> /mnt/etc/fstab
-success
+## Tasks
+# Pacman mirrorlist update
+t_exec "reflector $mirror_opts"
 
-## chroot
-suc="Successfully chrooted."
-err="Failed to execute chroot."
-echo -e "Chrooting..."
-arch-chroot /mnt
-success
+# Pacman settings
+if [ -f pacman_settings ] && [ -f $pacman_settings ]; then
+    t_exec "cat pacman_settings >> $pacman_settings"
+else
+    error_msg="File(s) missing:"
+    if [ ! -f pacman_settings ]; then
+        error_msg+=" pacman_settings"
+    fi
+    if [ ! -f "$pacman_settings" ]; then
+        error_msg+=" $pacman_settings"
+    fi
+    echo -e "$error_message. Skipping."
+fi
 
-## Update pacman files
-suc="Updated pacman mirrorlist..."
-err="Failed to update pacman mirrorlist."
-echo -e "Updating pacman mirrolist."
-reflector -c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist
-success
+# Pacman db update
+t_exec "pacman -Syu --noconfirm"
 
-## Pacman settigs
-suc="Updated pacman.conf..."
-err="Failed to update pacman.conf."
-echo -e "Updatiing pacman.conf."
-cat pacman_settings >> /etc/pacman.conf
-success
+# Pacstrap
+t_exec "pacstrap -K /mnt ${pkglist[@]}"
 
+# fstab
+t_exec "genfstab -U /mnt >> /mnt/etc/fstab"
 
-## Pacman db update
-#suc="Updated pacman db."
-#err="Failed to update pacman."
-#echo -e "Updating pacman..."
-#pacman -Syu --noconfirm
-#success
+# chroot
+t_exec "arch-chroot /mnt"
 
-## Date & time
-suc="Date & time set."
-err="Failed to set date & time."
-echo -e "Setting date & time..."
-ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-success
+# Pacman mirrorlist update
+t_exec "reflector $mirror_opts"
 
-## Clock sync
-suc="Sysclock synced to hwclock."
-err="Failed to sync sysclock to hwclock."
-echo -e "Syncing sysclock to hwclock..."
-hwclock --systohc
-success
+# Pacman settings
+if [ -f pacman_settings ] && [ -f $pacman_settings ]; then
+    t_exec "cat pacman_settings >> $pacman_settings"
+else
+    error_msg="File(s) missing:"
+    if [ ! -f pacman_settings ]; then
+        error_msg+=" pacman_settings"
+    fi
+    if [ ! -f "$pacman_settings" ]; then
+        error_msg+=" $pacman_settings"
+    fi
+    echo -e "$error_message. Skipping."
+fi
 
+# Install other pkgs
 
-## Localisation
-suc=""
-err=""
-# Edit '/etc/locale.gen', uncomment langs
-# Then run 'locale-gen'
-## Create locale.conf
-#mv /etc/locale.conf /etc/locale.conf.bak
-#mv /etc/locale.conf.new /etc/locale.conf
+# Pacman db update
+t_exec "pacman -Syu --noconfirm"
 
+# Date & time
+echo -e "Setting timezone to '$timezone'."
+t_exec "ln -sf /usr/share/zoneinfo/$timezone /etc/localtime"
 
-## Persistent console settings
-# KBM
-suc="Console kbm set successfully."
-err="Failed to set console kbm."
-echo -e "Creating backup of '/etc/vconsole.conf'."
-cp /etc/vconsole.conf /etc/vconsole.conf.bak
-echo -e "Setting console kbm."
-echo -e "KEYMAP=dvorak" >> /etc/vconsole.conf
-success
+# Clock sync
+t_exec "hwclock --systohc"
 
-# Font
-suc="Console font set successfully."
-err="Failed to set console font."
-echo -e "Setting console font."
-echo -e "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
-success
+# Localisation
+if [ -f "$locale_gen" ]; then
+    echo -e "Backing up $locale_gen ..."
+    mv "$locale_gen" "${locale_gen}.bak"
+fi
+# locale.gen
+cp locale_gen "$locale_gen"
+t_exec "locale-gen"
+# locale.conf
+if [ -f "$locale_conf" ]; then
+    echo -e "Backing up $locale_conf ..."
+    mv "$locale_conf" "${locale_conf}.bak"
+fi
+cp locale_conf "$locale_conf"
+
+# Backup and configure console
+if [ -f "$vconsole_conf" ]; then
+    echo -e "Backing up $vconsole_conf ..."
+    mv "$vconsole_conf" "${vconsole_conf}.bak"
+fi
+t_exec "echo 'KEYMAP=dvorak' > $vconsole_conf"
+t_exec "echo 'FONT=Lat2-Terminus16' >> $vconsole_conf"
 
 # Network config
 #    - Hostname
@@ -147,5 +138,11 @@ success
 
 # Reboot
 
-echo -e "All scripts executed successfully!"
-exit 0
+# Final check
+if [ $failed_count -eq 0 ]; then
+    echo -e "All tasks completed successfully!"
+    exit 0
+else
+    echo -e "Script completed with ${fbold}$failed_count${freset} failed task(s)."
+    exit 1
+fi
