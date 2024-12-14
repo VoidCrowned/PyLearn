@@ -90,10 +90,13 @@ else
     echo -e "$error_message. Skipping."
 fi
 
-# Install other pkgs
-
 # Pacman db update
 t_exec "pacman -Syu --noconfirm"
+
+# -----
+# Install other pkgs
+t_exec "pacman -S --noconfirm neovim sudo"
+# -----
 
 # Date & time
 echo -e "Setting timezone to '$timezone'."
@@ -103,15 +106,15 @@ t_exec "ln -sf /usr/share/zoneinfo/$timezone /etc/localtime"
 t_exec "hwclock --systohc"
 
 # Localisation
-if [ -f "$locale_gen" ]; then
+# locale.gen
+if [ -f locale_gen ] && [ -f "$locale_gen" ]; then
     echo -e "Backing up $locale_gen ..."
     mv "$locale_gen" "${locale_gen}.bak"
 fi
-# locale.gen
 cp locale_gen "$locale_gen"
 t_exec "locale-gen"
 # locale.conf
-if [ -f "$locale_conf" ]; then
+if [ -f locale_conf ] && [ -f "$locale_conf" ]; then
     echo -e "Backing up $locale_conf ..."
     mv "$locale_conf" "${locale_conf}.bak"
 fi
@@ -126,17 +129,22 @@ t_exec "echo 'KEYMAP=dvorak' > $vconsole_conf"
 t_exec "echo 'FONT=Lat2-Terminus16' >> $vconsole_conf"
 
 # Network config
-#    - Hostname
+t_exec "hostnamectl hostname sovereign_arch"
 
+# -----
 # Initramfs
+t_exec "mkinitcpio -P"
 
 # User setup
+t_exec "useradd -m -G wheel -s /bin/zsh void"
+passwd void
 
 # su/sudo
 
 # Bootloader
 
 # Reboot
+# -----
 
 # Final check
 if [ $failed_count -eq 0 ]; then
