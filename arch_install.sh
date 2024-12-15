@@ -1,36 +1,11 @@
 #!/usr/bin/env bash
 
 
-## Text formatting
-freset='\033[0m'
-fbold='\033[1m'
+# Including main functionality
+source ./arch_main.sh
 
-
-## Main vars
-failed_count=0
-
-
-## Main loop
-t_exec() {
-    local task="$1"
-    echo -e "Executing '$task' ..."
-    eval "$task"
-    local status=$?
-    if [ $status -eq 0 ]; then
-        echo -e "Successfully executed '$task'."
-    else
-        echo -e "Failed to execute '$task'."
-        failed_count=$((failed_count + 1))
-    fi
-}
-
-
-## Check privileges
-if [ "$EUID" -ne 0 ]; then
-    echo -e "Run this script with ${fbold}sudo${freset} or as ${fbold}root${freset}."
-    echo -e "Try again. Bailing."
-    exit 1
-fi
+# Check for root privileges
+check_priv
 
 
 ## Task vars
@@ -45,15 +20,15 @@ vconsole_conf="/etc/vconsole.conf"
 
 ## Tasks
 # Pacman mirrorlist update
-t_exec "reflector $mirror_opts"
+task_exec "reflector $mirror_opts"
 
 # Pacman settings
-if [ -f pacman_settings ] && [ -f $pacman_settings ]; then
-    t_exec "cat pacman_settings >> $pacman_settings"
+if [ -f pacman.conf.add ] && [ -f $pacman_settings ]; then
+    task_exec "cat pacman.conf.add >> $pacman_settings"
 else
     error_msg="File(s) missing:"
-    if [ ! -f pacman_settings ]; then
-        error_msg+=" pacman_settings"
+    if [ ! -f pacman.conf.add ]; then
+        error_msg+=" pacman.conf.add"
     fi
     if [ ! -f "$pacman_settings" ]; then
         error_msg+=" $pacman_settings"
@@ -62,27 +37,27 @@ else
 fi
 
 # Pacman db update
-t_exec "pacman -Syu --noconfirm"
+task_exec "pacman -Syu --noconfirm"
 
 # Pacstrap
-t_exec "pacstrap -K /mnt ${pkglist[@]}"
+task_exec "pacstrap -K /mnt ${pkglist[@]}"
 
 # fstab
-t_exec "genfstab -U /mnt >> /mnt/etc/fstab"
+task_exec "genfstab -U /mnt >> /mnt/etc/fstab"
 
 # chroot
-t_exec "arch-chroot /mnt"
+task_exec "arch-chroot /mnt"
 
 # Pacman mirrorlist update
-t_exec "reflector $mirror_opts"
+task_exec "reflector $mirror_opts"
 
 # Pacman settings
-if [ -f pacman_settings ] && [ -f $pacman_settings ]; then
-    t_exec "cat pacman_settings >> $pacman_settings"
+if [ -f pacman.conf.add ] && [ -f $pacman_settings ]; then
+    task_exec "cat pacman.conf.add >> $pacman_settings"
 else
     error_msg="File(s) missing:"
-    if [ ! -f pacman_settings ]; then
-        error_msg+=" pacman_settings"
+    if [ ! -f pacman.conf.add ]; then
+        error_msg+=" pacman.conf.add"
     fi
     if [ ! -f "$pacman_settings" ]; then
         error_msg+=" $pacman_settings"
@@ -91,52 +66,82 @@ else
 fi
 
 # Pacman db update
-t_exec "pacman -Syu --noconfirm"
+task_exec "pacman -Syu --noconfirm"
 
 # -----
 # Install other pkgs
-t_exec "pacman -S --noconfirm neovim sudo"
+task_exec "pacman -S --noconfirm neovim sudo"
 # -----
 
 # Date & time
 echo -e "Setting timezone to '$timezone'."
-t_exec "ln -sf /usr/share/zoneinfo/$timezone /etc/localtime"
+task_exec "ln -sf /usr/share/zoneinfo/$timezone /etc/localtime"
 
 # Clock sync
-t_exec "hwclock --systohc"
+task_exec "hwclock --systohc"
 
 # Localisation
 # locale.gen
-if [ -f locale_gen ] && [ -f "$locale_gen" ]; then
+if [ -f locale.gen.new ] && [ -f "$locale_gen" ]; then
     echo -e "Backing up $locale_gen ..."
     mv "$locale_gen" "${locale_gen}.bak"
+    echo -e "Copying locale.gen.new ..."
+    cp locale.gen.new "$locale_gen"
+else
+    error_msg="File(s) missing:"
+    if [ ! -f locale.gen.new ]; then
+        error_msg+=" locale.gen.new"
+    fi
+    if [ ! -f "$locale_gen" ]; then
+        error_msg+=" $locale_gen"
+    fi
+    echo -e "$error_message. Skipping."
+
 fi
-cp locale_gen "$locale_gen"
-t_exec "locale-gen"
+task_exec "locale-gen"
 # locale.conf
-if [ -f locale_conf ] && [ -f "$locale_conf" ]; then
+if [ -f locale.conf.new ] && [ -f "$locale_conf" ]; then
     echo -e "Backing up $locale_conf ..."
     mv "$locale_conf" "${locale_conf}.bak"
+    echo -e "Coping locale.conf.new ..."
+    cp locale.conf.new "$locale_conf"
+else
+    error_msg="File(s) missing:"
+    if [ ! -f locale.conf.new ]; then
+        error_msg+=" locale.conf.new"
+    fi
+    if [ ! -f "$locale_conf" ]; then
+        error_msg+=" $locale_conf"
+    fi
+    echo -e "$error_message. Skipping."
 fi
-cp locale_conf "$locale_conf"
 
-# Backup and configure console
-if [ -f "$vconsole_conf" ]; then
+# Console settings
+if [ -f vconsole.conf.new ] && [ -f "$vconsole_conf" ]; then
     echo -e "Backing up $vconsole_conf ..."
     mv "$vconsole_conf" "${vconsole_conf}.bak"
+    echo -e "Coping locale.conf.new ..."
+    cp vconsole.conf.new "$vconsole_conf"
+else
+    error_msg="File(s) missing:"
+    if [ ! -f vconsole.conf.new ]; then
+        error_msg+=" vconsole.conf.new"
+    fi
+    if [ ! -f "$vconsole_conf" ]; then
+        error_msg+=" $vconsole_conf"
+    fi
+    echo -e "$error_message. Skipping."
 fi
-t_exec "echo 'KEYMAP=dvorak' > $vconsole_conf"
-t_exec "echo 'FONT=Lat2-Terminus16' >> $vconsole_conf"
 
 # Network config
-t_exec "hostnamectl hostname sovereign_arch"
+task_exec "hostnamectl hostname sovereign_arch"
 
 # -----
 # Initramfs
-t_exec "mkinitcpio -P"
+task_exec "mkinitcpio -P"
 
 # User setup
-t_exec "useradd -m -G wheel -s /bin/zsh void"
+task_exec "useradd -m -G wheel -s /bin/zsh void"
 passwd void
 
 # su/sudo
