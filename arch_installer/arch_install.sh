@@ -8,27 +8,17 @@ source ./arch_main.sh
 check_priv
 
 
-## Task vars
-locale_gen="/etc/locale.gen"
-locale_conf="/etc/locale.conf"
-mirror_opts="-c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist"
-pacman_settings="/etc/pacman.conf"
-pkglist=("base" "linux" "linux-firmware" "intel-ucode")
-timezone="Europe/Berlin"
-vconsole_conf="/etc/vconsole.conf"
-
-
 ## Tasks
 # Pacman mirrorlist update
 task_exec "reflector $mirror_opts"
 
 # Pacman settings
-if [ -f pacman.conf.add ] && [ -f $pacman_settings ]; then
-    task_exec "cat pacman.conf.add >> $pacman_settings"
+if [ -f $bcfg/pacman.conf.add ] && [ -f $pacman_settings ]; then
+    task_exec "cat $bcfg/pacman.conf.add >> $pacman_settings"
 else
     error_msg="File(s) missing:"
-    if [ ! -f pacman.conf.add ]; then
-        error_msg+=" pacman.conf.add"
+    if [ ! -f $bcfg/pacman.conf.add ]; then
+        error_msg+=" $bcfg/pacman.conf.add"
     fi
     if [ ! -f "$pacman_settings" ]; then
         error_msg+=" $pacman_settings"
@@ -52,12 +42,12 @@ task_exec "arch-chroot /mnt"
 task_exec "reflector $mirror_opts"
 
 # Pacman settings
-if [ -f pacman.conf.add ] && [ -f $pacman_settings ]; then
-    task_exec "cat pacman.conf.add >> $pacman_settings"
+if [ -f $bcfg/pacman.conf.add ] && [ -f $pacman_settings ]; then
+    task_exec "cat $bcfg/pacman.conf.add >> $pacman_settings"
 else
     error_msg="File(s) missing:"
-    if [ ! -f pacman.conf.add ]; then
-        error_msg+=" pacman.conf.add"
+    if [ ! -f $bcfg/pacman.conf.add ]; then
+        error_msg+=" $bcfg/pacman.conf.add"
     fi
     if [ ! -f "$pacman_settings" ]; then
         error_msg+=" $pacman_settings"
@@ -82,15 +72,15 @@ task_exec "hwclock --systohc"
 
 # Localisation
 # locale.gen
-if [ -f locale.gen.new ] && [ -f "$locale_gen" ]; then
+if [ -f $bcfg/locale.gen.new ] && [ -f "$locale_gen" ]; then
     echo -e "Backing up $locale_gen ..."
     mv "$locale_gen" "${locale_gen}.bak"
-    echo -e "Copying locale.gen.new ..."
-    cp locale.gen.new "$locale_gen"
+    echo -e "Copying $bcfg/locale.gen.new ..."
+    cp $bcfg/locale.gen.new "$locale_gen"
 else
     error_msg="File(s) missing:"
-    if [ ! -f locale.gen.new ]; then
-        error_msg+=" locale.gen.new"
+    if [ ! -f $bcfg/locale.gen.new ]; then
+        error_msg+=" $bcfg/locale.gen.new"
     fi
     if [ ! -f "$locale_gen" ]; then
         error_msg+=" $locale_gen"
@@ -100,15 +90,15 @@ else
 fi
 task_exec "locale-gen"
 # locale.conf
-if [ -f locale.conf.new ] && [ -f "$locale_conf" ]; then
+if [ -f $bcfg/locale.conf.new ] && [ -f "$locale_conf" ]; then
     echo -e "Backing up $locale_conf ..."
     mv "$locale_conf" "${locale_conf}.bak"
-    echo -e "Coping locale.conf.new ..."
-    cp locale.conf.new "$locale_conf"
+    echo -e "Coping $bcfg/locale.conf.new ..."
+    cp $bcfg/locale.conf.new "$locale_conf"
 else
     error_msg="File(s) missing:"
-    if [ ! -f locale.conf.new ]; then
-        error_msg+=" locale.conf.new"
+    if [ ! -f $bcfg/locale.conf.new ]; then
+        error_msg+=" $bcfg/locale.conf.new"
     fi
     if [ ! -f "$locale_conf" ]; then
         error_msg+=" $locale_conf"
@@ -117,15 +107,15 @@ else
 fi
 
 # Console settings
-if [ -f vconsole.conf.new ] && [ -f "$vconsole_conf" ]; then
+if [ -f $bcfg/vconsole.conf.new ] && [ -f "$vconsole_conf" ]; then
     echo -e "Backing up $vconsole_conf ..."
     mv "$vconsole_conf" "${vconsole_conf}.bak"
-    echo -e "Coping locale.conf.new ..."
-    cp vconsole.conf.new "$vconsole_conf"
+    echo -e "Coping $bcfg/locale.conf.new ..."
+    cp $bcfg/vconsole.conf.new "$vconsole_conf"
 else
     error_msg="File(s) missing:"
-    if [ ! -f vconsole.conf.new ]; then
-        error_msg+=" vconsole.conf.new"
+    if [ ! -f $bcfg/vconsole.conf.new ]; then
+        error_msg+=" $bcfg/vconsole.conf.new"
     fi
     if [ ! -f "$vconsole_conf" ]; then
         error_msg+=" $vconsole_conf"

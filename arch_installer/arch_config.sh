@@ -3,6 +3,7 @@
 
 # Including main functionality
 source ./arch_main.sh
+source ./pre_check.sh
 
 # Check for root privileges
 check_priv
@@ -10,22 +11,36 @@ check_priv
 
 # Update reflector for better mirrors
 t_exec "reflector $mirror_opts"
-#echo "Updated mirrors."
-#cat pacman.conf.add >> /etc/pacman.conf
-#echo "Appended pacman.conf.add to pacman.conf."
+
+# Pacman settings
+if [ -f $bcfg/pacman.conf.add ] && [ -f $pacman_settings ]; then
+    task_exec "cat $bcfg/pacman.conf.add >> $pacman_settings"
+else
+    error_msg="File(s) missing:"
+    if [ ! -f $bcfg/pacman.conf.add ]; then
+        error_msg+=" $bcfg/pacman.conf.add"
+    fi
+    if [ ! -f "$pacman_settings" ]; then
+        error_msg+=" $pacman_settings"
+    fi
+    echo -e "$error_message. Skipping."
+fi
 
 # List of scripts to run
-scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
+#scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
 
 # Main loop
-for script in "${scripts[@]}"; do
-    echo -e "Running $script."
-    ./checks/$script
-    if [[ $? -ne 0 ]]; then
-        echo -e "$script failed. Exiting."
-        exit 1
-    fi
-done
+check_efi
+check_font
+check_kbm
+#for script in "${scripts[@]}"; do
+#    echo -e "Running $script."
+#    ./checks/$script
+#    if [[ $? -ne 0 ]]; then
+#        echo -e "$script failed. Exiting."
+#        exit 1
+#    fi
+#done
 
 echo "All scripts executed successfully!"
 echo "Please proceed with disk partitioning."

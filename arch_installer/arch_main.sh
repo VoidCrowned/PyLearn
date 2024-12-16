@@ -2,7 +2,8 @@
 
 
 # Main script collection
-# Include this in every other script for functionality
+# Include this in every other script,
+# to ensure proper functionality.
 
 
 # Text formatting
@@ -20,8 +21,19 @@ check_priv() {
 }
 
 
+# File vars
+bcfg="./base_configs"
+locale_gen="/etc/locale.gen"
+locale_conf="/etc/locale.conf"
+vconsole_conf="/etc/vconsole.conf"
+pacman_settings="/etc/pacman.conf"
+
+# Sys vars
+timezone="Europe/Berlin"
+
 # Pacman vars
 mirror_opts="-c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist"
+pkglist=("base" "linux" "linux-firmware" "intel-ucode")
 
 
 # Main loop
