@@ -1,5 +1,5 @@
 # co_learn
-### arch_*.sh, pacman_settings
+### arch_installer
 Arch Linux intstallation helpers, WIP.
 ### sysfetch.sh
-Small sysfetch tool I wrote while undergoing training, handed in as project.
+Small sysfetch tool I wrote while undergoing training, handed in as project. (Definitely needs a rework though.)
