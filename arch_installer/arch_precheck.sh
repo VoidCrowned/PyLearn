@@ -3,36 +3,22 @@
 
 # Including main functionality
 source ./arch_main.sh
-source ./pre_check.sh
 
 # Check for root privileges
 check_priv
-
 
 # Update reflector for better mirrors
 t_exec "reflector $mirror_opts"
 
 # Pacman settings
-if [ -f $bcfg/pacman.conf.add ] && [ -f $pacman_settings ]; then
-    task_exec "cat $bcfg/pacman.conf.add >> $pacman_settings"
-else
-    error_msg="File(s) missing:"
-    if [ ! -f $bcfg/pacman.conf.add ]; then
-        error_msg+=" $bcfg/pacman.conf.add"
-    fi
-    if [ ! -f "$pacman_settings" ]; then
-        error_msg+=" $pacman_settings"
-    fi
-    echo -e "$error_message. Skipping."
-fi
-
-# List of scripts to run
-#scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
+set_pacman_settings
 
 # Main loop
 check_efi
 check_font
 check_kbm
+# List of scripts to run
+#scripts=("check_kbm.sh" "check_font.sh" "check_boot.sh")
 #for script in "${scripts[@]}"; do
 #    echo -e "Running $script."
 #    ./checks/$script
@@ -42,8 +28,7 @@ check_kbm
 #    fi
 #done
 
-echo "All scripts executed successfully!"
-echo "Please proceed with disk partitioning."
+echo "Done! Please proceed with 'arch_install.sh'."
 exit 0
 
 
