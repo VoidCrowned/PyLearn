@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
 
+#
 # Main script collection
 # Include this in every other script,
 # to ensure proper functionality.
 #
-# Run
+# Edit vars below as needed,
+# Then run
 # arch_precheck.sh
 # arch_install.sh
 #
-# Edit vars below as needed.
 
 
 # Text formatting
@@ -39,9 +40,14 @@ pref_kbm="dvorak"
 pref_font="Lat2-Terminus16"
 timezone="Europe/Berlin"
 
+# User vars
+hostname="sovereign_arch"
+user="void"
+
 # Pacman vars
 mirror_opts="-c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist"
-pkglist=("base" "linux" "linux-firmware" "intel-ucode")
+pkglist=("base" "linux" "linux-firmware" "intel-ucode" "sudo")
+ext_pkglist=("neovim" "openbox" "nvidia" "xorg")
 
 
 # Pacman settings
@@ -79,14 +85,14 @@ task_exec() {
 # Verify boot mode
 # Check if we're in EFI mode by inspecting /sys/firmware/efi/fw_platform_size
 check_efi() {
-    echo "Checking if the system is booted in EFI mode."
+    echo -e "Checking if the system is booted in EFI mode."
     efi_mode=$(cat /sys/firmware/efi/fw_platform_size)
     # If the value is 64, we're in EFI mode
     if [[ "$efi_mode" -eq 64 ]]; then
-        echo "System is booted in EFI mode."
+        echo -e "System is booted in EFI mode."
         exit 0
     else
-        echo "System is not booted in EFI mode."
+        echo -e "System is not booted in EFI mode."
         exit 1
     fi
 }
@@ -95,20 +101,20 @@ check_efi() {
 # Set font
 # Check if the $pref_font exists in the specified directory
 check_font() {
-    echo "Checking for '$pref_font' font."
+    echo -e "Checking for '$pref_font' font."
     available_font=$(ls /usr/share/kbd/consolefonts | grep -w "$pref_font")
     if [[ -n "$available_font" ]]; then
-        echo "Font '$pref_font' found."
+        echo -e "Font '$pref_font' found."
         setfont $pref_font
         if [[ $? -eq 0 ]]; then
-            echo "Set '$pref_font' as the console font."
+            echo -e "Set '$pref_font' as the console font."
             exit 0
         else
-            echo "Failed to set the console font to '$pref_font'."
+            echo -e "Failed to set the console font to '$pref_font'."
             exit 1
         fi
     else
-        echo "Font '$pref_font' not found."
+        echo -e "Font '$pref_font' not found."
         exit 1
     fi
 }
@@ -121,17 +127,17 @@ check_kbm() {
     available_kbm=$(localectl list-keymaps | grep -w "$pref_kbm")
     # Check if kbm  exists in the list
     if [[ -n "$available_kbm" ]]; then
-        echo "Kbmap '$pref_kbm' found."
+        echo -e "Kbmap '$pref_kbm' found."
         loadkeys "$pref_kbm"
         if [[ $? -eq 0 ]];
-            echo "Loaded '$pref_kbm' kbmap."
+            echo -e "Loaded '$pref_kbm' kbmap."
             exit 0
         else
-            echo "Failed to load '$pref_kbm' kbmap."
+            echo -e "Failed to load '$pref_kbm' kbmap."
             exit 1
         fi
     else
-        echo "Kbmap '$pref_kbm' not found."
+        echo -e "Kbmap '$pref_kbm' not found."
     exit 1
     fi
 }
