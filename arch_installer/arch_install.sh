@@ -102,6 +102,7 @@ else
 fi
 
 # Network config
+read -rp "Hostname: " hostname
 task_exec 'hostnamectl hostname "$hostname"'
 
 # -----
@@ -109,10 +110,15 @@ task_exec 'hostnamectl hostname "$hostname"'
 task_exec "mkinitcpio -P"
 
 # User setup
-task_exec 'useradd -m -G wheel -s /bin/zsh "$user"'
-passwd "$user" 1234
+if confirm "Is '$user_name' the correct username?"; then
+    create_user
+else
+    read -rp "Enter a new username: " user_name
+    create_user
+fi
 
 # su/sudo
+#passwd root root
 
 # Bootloader
 

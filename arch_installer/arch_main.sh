@@ -42,12 +42,12 @@ timezone="Europe/Berlin"
 
 # User vars
 hostname="sovereign_arch"
-user="void"
+user_name="void"
 
 # Pacman vars
 mirror_opts="-c EU -p https --age 6 --fastest 5 --sort rate --save /etc/pacman.d/mirrorlist"
 pkglist=("base" "linux" "linux-firmware" "intel-ucode" "sudo")
-ext_pkglist=("neovim" "openbox" "nvidia" "xorg")
+ext_pkglist=("neovim" "openbox" "nvidia" "xorg" "mlocate")
 
 
 # Pacman settings
@@ -139,5 +139,48 @@ check_kbm() {
     else
         echo -e "Kbmap '$pref_kbm' not found."
     exit 1
+    fi
+}
+
+
+# User handling
+# Function to prompt for confirmation
+confirm() {
+    local user_confirm
+    read -rp "$1 (y/n): " user_confirm
+    case "$user_confirm" in
+        [Yy]*) return 0 ;; # Confirmed
+        [Nn]*) return 1 ;; # Denied
+        *) echo "Please enter 'y' or 'n'." ; confirm "$1" ;; # Retry
+    esac
+}
+
+# Function to create user
+create_user() {
+    local user_pw user_pw_confirm
+    # Create the user
+    if useradd -m -G wheel -s /bin/zsh "$user_name"; then
+        echo "User '$user_name' created successfully."
+    else
+        echo "Error creating user '$user_name'." >&2
+        exit 1
+    fi
+
+    # Ask to set password
+    if confirm "Would you like to set a password for '$user_name'?"; then
+        read -rsp "Enter password: " user_pw
+        echo
+        read -rsp "Confirm password: " user_pw_confirm
+        echo
+        if [[ "$user_pw" != "$user_pw_confirm" ]]; then
+            echo "Passwords do not match. Password not set." >&2
+            return 1
+        fi
+
+        # Set the password
+        echo "$user_name:$user_pw" | chpasswd
+        echo "Password set successfully."
+    else
+        echo "Password not set for '$user_name'."
     fi
 }
