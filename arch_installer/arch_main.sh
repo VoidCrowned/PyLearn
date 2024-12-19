@@ -20,7 +20,7 @@ fbold='\033[1m'
 
 # Check privileges
 check_priv() {
-    if [ "$EUID" -ne 0 ]; then
+    if [[ "$EUID" -ne 0 ]]; then
         echo -e "Run this script with ${fbold}sudo${freset} or as ${fbold}root${freset}."
         echo -e "Try again. Bailing."
         exit 1
@@ -52,14 +52,14 @@ ext_pkglist=("neovim" "openbox" "nvidia" "xorg" "mlocate")
 
 # Pacman settings
 set_pacman_settings() {
-    if [ -f "$bcfg/pacman.conf.add" ] && [ -f "$pacman_settings" ]; then
+    if [[ -f "$bcfg/pacman.conf.add" ]] && [[ -f "$pacman_settings" ]]; then
         task_exec "cat $bcfg/pacman.conf.add >> $pacman_settings"
     else
         error_msg="File(s) missing:"
-        if [ ! -f "$bcfg/pacman.conf.add" ]; then
+        if [[ ! -f "$bcfg/pacman.conf.add" ]]; then
             error_msg+=" $bcfg/pacman.conf.add"
         fi
-        if [ ! -f "$pacman_settings" ]; then
+        if [[ ! -f "$pacman_settings" ]]; then
             error_msg+=" $pacman_settings"
         fi
         echo -e "$error_msg. Skipping."
@@ -71,9 +71,9 @@ failed_count=0
 task_exec() {
     local task="$1"
     echo -e "Executing '$task' ..."
-    eval "$task"
-    local status=$?
-    if [ "$status" -eq 0 ]; then
+    "$task"
+    local status="$?"
+    if [[ "$status" -eq 0 ]]; then
         echo -e "Successfully executed '$task'."
     else
         echo -e "Failed to execute '$task'."
