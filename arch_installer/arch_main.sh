@@ -52,17 +52,17 @@ ext_pkglist=("neovim" "openbox" "nvidia" "xorg" "mlocate")
 
 # Pacman settings
 set_pacman_settings() {
-    if [ -f $bcfg/pacman.conf.add ] && [ -f $pacman_settings ]; then
+    if [ -f "$bcfg/pacman.conf.add" ] && [ -f "$pacman_settings" ]; then
         task_exec "cat $bcfg/pacman.conf.add >> $pacman_settings"
     else
         error_msg="File(s) missing:"
-        if [ ! -f $bcfg/pacman.conf.add ]; then
+        if [ ! -f "$bcfg/pacman.conf.add" ]; then
             error_msg+=" $bcfg/pacman.conf.add"
         fi
         if [ ! -f "$pacman_settings" ]; then
             error_msg+=" $pacman_settings"
         fi
-        echo -e "$error_message. Skipping."
+        echo -e "$error_msg. Skipping."
     fi
 }
 
@@ -73,7 +73,7 @@ task_exec() {
     echo -e "Executing '$task' ..."
     eval "$task"
     local status=$?
-    if [ $status -eq 0 ]; then
+    if [ "$status" -eq 0 ]; then
         echo -e "Successfully executed '$task'."
     else
         echo -e "Failed to execute '$task'."
@@ -105,8 +105,8 @@ check_font() {
     available_font=$(ls /usr/share/kbd/consolefonts | grep -w "$pref_font")
     if [[ -n "$available_font" ]]; then
         echo -e "Font '$pref_font' found."
-        setfont $pref_font
-        if [[ $? -eq 0 ]]; then
+        setfont "$pref_font"
+        if [[ "$?" -eq 0 ]]; then
             echo -e "Set '$pref_font' as the console font."
             exit 0
         else
@@ -129,7 +129,7 @@ check_kbm() {
     if [[ -n "$available_kbm" ]]; then
         echo -e "Kbmap '$pref_kbm' found."
         loadkeys "$pref_kbm"
-        if [[ $? -eq 0 ]];
+        if [[ "$?" -eq 0 ]]; then
             echo -e "Loaded '$pref_kbm' kbmap."
             exit 0
         else
