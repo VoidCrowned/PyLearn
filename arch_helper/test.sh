@@ -4,10 +4,11 @@
 set -euo pipefail
 
 # Source formatting
-source ./arch_tools.sh
+source ./tools.sh
 
 run_test() {
     log_info "This is a 'log_info level' message."
+    log_success "This is a 'log_success level' message."
     log_warn "This is a 'log_warn level' message."
     log_error "This is a 'log_error level' message."
     log_debug "This is a 'log_debug level' message."

@@ -4,7 +4,7 @@
 set -euo pipefail
 
 # Source formatting
-source ./arch_tools.sh
+source ./tools.sh
 
 run_precheck() {
     log_info "Checking internet connectivity..."

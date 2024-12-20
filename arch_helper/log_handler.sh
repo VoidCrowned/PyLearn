@@ -4,14 +4,18 @@
 set -euo pipefail
 
 # Source formatting
-source ./arch_tools.sh
+source ./tools.sh
 
 # Logging settings
 LOG_LEVEL="info"
 VERBOSE_LOGGING=false
 
 log_info() {
-    echo -e " [ ${fgre}INF${fstd} ] $*"
+    echo -e " [ INF ] $*"
+}
+
+log_success() {
+    echo -e " [ ${fgre}SUC${fstd} ] $*"
 }
 
 log_warn() {
