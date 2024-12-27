@@ -14,18 +14,22 @@ source ./test.sh
 show_help() {
     echo " Usage: arch_install.sh [OPTIONS]"
     echo " -h, --help                  Show this help message"
-    echo " -p, --precheck              Run 'precheck.sh'"
+    echo ""
     echo " -c, --config                Run 'preconfig.sh'"
-    echo " -r, --run                   Run the full installation"
+    echo " -d, --dry-run               Run it all, but don't actually apply anything"
+    echo " -f, --full-run              Run the full installation"
+    echo " -p, --precheck              Run 'precheck.sh'"
     echo " -t, --test                  Run 'test.sh'"
     echo " -v, --verbose               Enable verbose logging"
+    echo ""
+    echo " Suggested: -p; -dc; -c; -df; -f"
     # Add more as needed
-    # TODO Add dry-run option
 }
 
-PRECHECK=false
 CONFIG=false
-INSTALL=false
+DRY=false
+FULL=false
+PRECHECK=false
 TEST=false
 VERBOSE=false
 
@@ -36,14 +40,17 @@ while (( "$#" )); do
             show_help
             exit 0
             ;;
-        --precheck)
-            PRECHECK=true
-            ;;
         --config)
             CONFIG=true
             ;;
-        --run)
-            INSTALL=true
+        --dry-run)
+            DRY=true
+            ;;
+        --full-run)
+            FULL=true
+            ;;
+        --precheck)
+            PRECHECK=true
             ;;
         --test)
             TEST=true
@@ -62,14 +69,17 @@ while (( "$#" )); do
                         show_help
                         exit 0
                         ;;
-                    p)
-                        PRECHECK=true
-                        ;;
                     c)
                         CONFIG=true
                         ;;
-                    r)
-                        INSTALL=true
+                    d)
+                        DRY=true
+                        ;;
+                    f)
+                        FULL=true
+                        ;;
+                    p)
+                        PRECHECK=true
                         ;;
                     t)
                         TEST=true
@@ -94,62 +104,33 @@ while (( "$#" )); do
     shift
 done
 
-#while (( "$#" )); do
-#    case "$1" in
-#        -h|--help)
-#            show_help
-#            exit 0
-#            ;;
-#        -p|--precheck)
-#            PRECHECK=true
-#            ;;
-#        -c|--config)
-#            CONFIG=true
-#            ;;
-#        -r|--run)
-#            INSTALL=true
-#            ;;
-#        -t|--test)
-#            TEST=true
-#            ;;
-#        -v|--verbose)
-#            VERBOSE=true
-#            ;;
-#        *)
-#            log_error "Unknown option: $1"
-#            show_help
-#            exit 1
-#            ;;
-#    esac
-#    shift
-#done
 
-# If verbose is enabled, tell the handler
-if [[ "$VERBOSE" = true ]]; then
-    enable_verbose_logging
-fi
-
-# Run pre-checks if requested
-if [[ "$PRECHECK" = true ]]; then
-    log_info "Running system pre-checks..."
-    run_precheck # from precheck.sh
-fi
-
-# Run pre-config if requested
+# Run the requested option
 if [[ "$CONFIG" = true ]]; then
     log_info "Running pre-config..."
     run_preconfig # from preconfig.sh
 fi
 
-# Run the main installation if requested
-if [[ "$INSTALL" = true ]]; then
+if [[ "$DRY" = true ]]; then
+    log_info "Running dry..."
+    run_dry # from TODO
+fi
+
+if [[ "$FULL" = true ]]; then
     log_info "Starting the full Arch installation..."
     run_main_install # from main.sh
 fi
 
-# Run 'arch_test.sh' if requested
+if [[ "$PRECHECK" = true ]]; then
+    log_info "Running system pre-checks..."
+    run_precheck # from precheck.sh
+fi
+
 if [[ "$TEST" = true ]]; then
     log_info "Running 'arch_test.sh'..."
     run_test # from test.sh
 fi
 
+if [[ "$VERBOSE" = true ]]; then
+    enable_verbose_logging
+fi
