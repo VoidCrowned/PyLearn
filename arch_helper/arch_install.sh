@@ -20,6 +20,7 @@ show_help() {
     echo " -t, --test                  Run 'test.sh'"
     echo " -v, --verbose               Enable verbose logging"
     # Add more as needed
+    # TODO Add dry-run option
 }
 
 PRECHECK=false
