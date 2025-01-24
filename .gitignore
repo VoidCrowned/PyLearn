@@ -1,0 +1,3 @@
+# Don't upload these for now
+arch_helper/
+arch_installer/
