@@ -23,39 +23,29 @@ fgred() {
 
 # Services
 serv_01=("0x0.st" "https://0x0.st")
-#serv_01=("0x0.st" "https://0x0.st")
+#serv_02=("0x0.st" "https://0x0.st")
 
 # Function to display help message
 show_help() {
     echo "Usage:"
     echo -e "    $(fgbol 'uppies.sh') [service] [file]"
-#    echo -e "    $(fgbol 'uppies.sh') h, -h, help, --help"
-    echo "    The returned link will be copied to your clipboard."
-    echo ""
+    echo -e "    The returned link will be copied to your clipboard.\n"
     echo "Configured services:"
     echo -e "    $(fgbol '1')) "${serv_01[0]}""
     exit 0
 }
 
-# Check for help options
-#if [[ "$1" == "h" || "$1" == "-h" || "$1" == "help" || "$1" == "--help" ]]; then
-#    show_help
-#    exit 0
-#fi
-
 # Check if the service is provided
 if [[ -z "$1" ]]; then
     show_help
-    # echo "2) placeholder"
-    # echo "3) placeholder"
     exit 1
 fi
 
 # Set the upload URL based on the specified service
 if [[ "$1" == "1" ]]; then
     URL=""${serv_01[1]}""
-    # elif [[ "$1" == "2" ]]; then
-    # URL=""
+#    elif [[ "$1" == "2" ]]; then
+#    URL=""${serv_02[1]}""
 else
     echo -e "$(fgred 'Unsupported service:') $1"
     exit 1
@@ -70,6 +60,6 @@ else
     response=$(curl --silent -F "file=@-" "$URL")
 fi
 
-# Print the response and copy it to clipboard
+# Print the response & copy it to clipboard
 echo "$response"
 echo -n "$response" | xclip -selection clipboard
