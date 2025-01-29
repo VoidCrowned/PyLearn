@@ -25,9 +25,9 @@ fgred() {
 declare -A services
 services=(
     [1]="0x0.st https://0x0.st"
-#    [2]="0x0.backup https://0x0.backup"
-#    [3]="another.service https://another.service"
+#    [2]="other.service https://other.service"
 )
+
 # Function to display help message
 show_help() {
     echo "Usage:"
