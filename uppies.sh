@@ -21,17 +21,23 @@ fgred() {
     echo -e "${fgred}$*${fres}"
 }
 
-# Services
-serv_01=("0x0.st" "https://0x0.st")
-#serv_02=("0x0.st" "https://0x0.st")
-
+# Associative array for services
+declare -A services
+services=(
+    [1]="0x0.st https://0x0.st"
+#    [2]="0x0.backup https://0x0.backup"
+#    [3]="another.service https://another.service"
+)
 # Function to display help message
 show_help() {
     echo "Usage:"
     echo -e "    $(fgbol 'uppies.sh') [service] [file]"
     echo -e "    The returned link will be copied to your clipboard.\n"
     echo "Configured services:"
-    echo -e "    $(fgbol '1')) "${serv_01[0]}""
+    for key in "${!services[@]}"; do
+        service_info=(${services[$key]})
+        echo -e "    $(fgbol "$key")) ${service_info[0]}"
+    done
     exit 0
 }
 
@@ -42,10 +48,9 @@ if [[ -z "$1" ]]; then
 fi
 
 # Set the upload URL based on the specified service
-if [[ "$1" == "1" ]]; then
-    URL=""${serv_01[1]}""
-#    elif [[ "$1" == "2" ]]; then
-#    URL=""${serv_02[1]}""
+if [[ -n "${services[$1]}" ]]; then
+    service_info=(${services[$1]})
+    URL="${service_info[1]}"
 else
     echo -e "$(fgred 'Unsupported service:') $1"
     exit 1
