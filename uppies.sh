@@ -12,12 +12,12 @@ fgred='\033[0;31m'
 set -e
 
 # Function to print text in bold
-fgbol() {
+fg_b() {
     echo -e "${fbol}$*${fres}"
 }
 
 # Function to print text in red
-fgred() {
+fg_r() {
     echo -e "${fgred}$*${fres}"
 }
 
@@ -25,18 +25,18 @@ fgred() {
 declare -A services
 services=(
     [1]="0x0.st https://0x0.st"
-#    [2]="other.service https://other.service"
+    [2]="other.service https://other.service"
 )
 
 # Function to display help message
 show_help() {
     echo "Usage:"
-    echo -e "    $(fgbol 'uppies.sh') [service] [file]"
+    echo -e "    $(fg_b 'uppies.sh') [service] [file]"
     echo -e "    The returned link will be copied to your clipboard.\n"
     echo "Configured services:"
-    for key in "${!services[@]}"; do
+    for key in $(printf "%s\n" "${!services[@]}" | sort -n); do
         service_info=(${services[$key]})
-        echo -e "    $(fgbol "$key")) ${service_info[0]}"
+        echo -e "    $(fg_b "$key")) ${service_info[@]}"
     done
     exit 0
 }
@@ -52,7 +52,7 @@ if [[ -n "${services[$1]}" ]]; then
     service_info=(${services[$1]})
     URL="${service_info[1]}"
 else
-    echo -e "$(fgred 'Unsupported service:') $1"
+    echo -e "$(fg_r 'Unsupported service:') $1"
     exit 1
 fi
 
