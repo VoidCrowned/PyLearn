@@ -56,12 +56,15 @@ else
     exit 1
 fi
 
-# Check if input is piped or if it's a file provided as an argument
+# Is input provided?
+# If so, is input is piped or if it's a file provided as an argument
 if [[ -t 0 ]]; then
-    # No input from pipe, use the file path
+    if [[ -z "$2" || ! -f "$2" ]]; then
+        echo -e "$(print_fgred 'Error:') No valid file provided."
+        exit 1
+    fi
     response=$(curl --silent -F "file=@$2" "$URL")
 else
-    # Input from pipe, use stdin
     response=$(curl --silent -F "file=@-" "$URL")
 fi
 
