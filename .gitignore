@@ -1,3 +1,4 @@
 # Don't upload these for now
+.gitignore
 arch_helper/
 arch_installer/
