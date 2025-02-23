@@ -9,7 +9,7 @@ source 00_settings.sh
 source 99_styles.sh
 
 check_priv
-set +ex
+set -ex
 
 # Pacstrap base & additional packages
 pacstrap -K /mnt "${base_pkglist[@]}"

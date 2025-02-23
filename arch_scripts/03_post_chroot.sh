@@ -9,7 +9,7 @@ source 00_settings.sh
 source 99_styles.sh
 
 check_priv
-set +ex
+set -ex
 
 # Set kbd & font to work with
 loadkeys dvorak
@@ -64,6 +64,7 @@ reflector "$mirror_opts" --save /etc/pacman.d/mirrorlist
 cat <<EOF >> /etc/pacman.conf
 
 # PERSONAL SETTINGS
+[options]
 Color
 ParallelDownloads = 10
 VerbosePkgLists

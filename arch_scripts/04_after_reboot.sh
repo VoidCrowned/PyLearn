@@ -9,7 +9,7 @@ source 00_settings.sh
 source 99_styles.sh
 
 check_priv
-set +ex
+set -ex
 
 # Install the last batch of packages
 pacman -S "${reboot_pkglist[@]}" 

@@ -9,7 +9,7 @@ source 00_settings.sh
 source 99_styles.sh
 
 check_priv
-set +ex
+set -ex
 
 # Set kbd & font to work with
 loadkeys dvorak
@@ -24,12 +24,15 @@ timedatectl
 reflector "$mirror_opts" --save /etc/pacman.d/mirrorlist
 cat <<EOF >> /etc/pacman.conf
 
-# Personal settings
+# PERSONAL SETTINGS
+[options]
+Color
 ParallelDownloads = 10
+VerbosePkgList
 EOF
 
 # Install necessary packages
-pacman -S --noconfirm libcurl git
+pacman -S --noconfirm git
 
 # Figure out your FS,
 # cfdisk, zswap, mkfs.ext4, mkswap/swapon
